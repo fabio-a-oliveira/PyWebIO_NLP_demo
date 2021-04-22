@@ -29,6 +29,6 @@ if __name__ == '__main__':
     put_text('This series of demos showcases the use of some Natural Language Processing (NLP) techniques to aviation regulations. Choose your favorite and enjoy!')
     put_markdown('---')
     
-    for _ in range(10):
+    for _ in range(100):
     
         choose_demonstration()
