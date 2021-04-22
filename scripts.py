@@ -146,6 +146,21 @@ def jaccard_mod(string1, string2, tokenizer, embedding_layer, max_words = None):
 
         return intersection/union
     
+    
+# ====================================================================================================================================
+# main()    
+# ====================================================================================================================================
+
+def main():
+    
+    put_markdown('## NLP applied to aviation regulations')
+    put_markdown('### Demonstrations using 14 CFR Part 121 and RBAC 121')
+    put_text('This series of demos showcases the use of some Natural Language Processing (NLP) techniques to aviation regulations. Choose your favorite and enjoy!')
+    put_markdown('---')
+    
+    for _ in range(100):
+        choose_demonstration()
+    
 # ====================================================================================================================================
 # choose_demonstration()
 # ====================================================================================================================================
