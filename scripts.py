@@ -333,7 +333,8 @@ def about_comparison():
 # ====================================================================================================================================
 # classify_FAA()    
 # ====================================================================================================================================
-    
+
+@use_scope('demo', clear=True)    
 def classify_FAA(df, tokenizer, model):
 
     random_prompt = "I don't care, just choose at random!"
@@ -371,6 +372,7 @@ def classify_FAA(df, tokenizer, model):
 # classify_ANAC()    
 # ====================================================================================================================================
   
+@use_scope('demo', clear=True)
 def classify_ANAC(df, tokenizer, model):
 
     random_prompt = "I don't care, just choose at random!"
@@ -409,6 +411,7 @@ def classify_ANAC(df, tokenizer, model):
 # classify_from_input()
 # ====================================================================================================================================
 
+@use_scope('demo', clear=True)
 def classify_from_input(tokenizer, model):
     
     placeholder = "Type or paste your requirement here"
@@ -437,8 +440,6 @@ def classify_from_input(tokenizer, model):
     predicted_tag = ['Title Only', 'Aircraft', 'Operator'][predicted_label]
     
     put_table([[predicted_tag, str(np.round(100*predicted_prob,3)) + '%']], header = ['Predicted Classification:', 'Level of Confidence'])
-
-
 
 # ====================================================================================================================================
 # about_classification()
