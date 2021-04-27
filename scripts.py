@@ -435,7 +435,7 @@ def classify_from_input(tokenizer, model):
     if src_language != 'en':
         put_table([[translation]], header = ["Translation (from '{}' to 'en')".format(src_language)])
         
-    tokens = tokenizer.texts_to_sequences([req])
+    tokens = tokenizer.texts_to_sequences([translation])
     padded_tokens = tf.keras.preprocessing.sequence.pad_sequences(tokens, maxlen = sequence_length)
     X = tf.constant(np.array(padded_tokens))
     prediction = model.predict(X)
