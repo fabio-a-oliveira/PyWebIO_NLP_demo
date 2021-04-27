@@ -15,6 +15,7 @@ import pickle
 from googletrans import Translator
 from os import listdir, mkdir, chdir, getcwd
 from os.path import join
+import requests
 
 
 from pywebio.input import input_group, input, select, checkbox, radio, actions, textarea
@@ -33,10 +34,10 @@ URL_ANAC_pr = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/Reg
 URL_TOKENIZER_pr = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/models/tokenizer___2021-04-16_16-04-53.h5?raw=true"
 URL_EMBEDDING_pr = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/models/embedding_layer___2021-04-16_16-04-53.h5?raw=true"
 URL_FAA_cl = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/Regulations/FAR_Part121_nodes_labelled.xlsx?raw=true"
-URL_ANAC_cl = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/Regulations/RBAC121_nodes.xlsx?raw=true"
-URL_TOKENIZER_cl = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/models/tokenizer___2021-04-16_15-56-43.h5?raw=true"
-URL_MODEL_cl = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/models/model___2021-04-16_15-56-43___Bidirectional_GRU_Softmax.h5?raw=true"
-
+URL_ANAC_cl = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/Regulations/RBAC121_nodes_en_labelled.xlsx?raw=true"
+URL_TOKENIZER_cl = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/models/tokenizer___2021-04-27_00-01-32.h5?raw=true"
+URL_MODEL_cl = "https://github.com/fabio-a-oliveira/NLP_Regulations/blob/main/models/model___2021-04-27_00-01-32___GRU_stack_Softmax.h5?raw=true"
+ 
 URLs = [URL_FAA_pr, URL_ANAC_pr, URL_TOKENIZER_pr, URL_EMBEDDING_pr, URL_FAA_cl, URL_ANAC_cl, URL_TOKENIZER_cl, URL_MODEL_cl]
 filenames = ['FAA_pr.xlsx', 'ANAC_pr.xlsx', 'TK_pr.h5', 'EMB_pr.h5', 'FAA_cl.xlsx', 'ANAC_cl.xlsx', 'TK_cl.h5', 'MD_cl.h5']
 
@@ -77,7 +78,7 @@ with open(filepath_EMB_pr, 'rb') as file:
 # Variable definitions for classification
 
 df_FAA_cl = pd.read_excel(filepath_FAA_cl)[['title','requirement','label','tag']]
-df_ANAC_cl = pd.read_excel(filepath_ANAC_cl)[['title','requirement']] # + label + tag!!!
+df_ANAC_cl = pd.read_excel(filepath_ANAC_cl)[['title','requirement','label','tag']]
 translator = Translator()
 
 with open(filepath_TK_cl, 'rb') as file:
@@ -158,7 +159,7 @@ def main():
     put_text('This series of demos showcases the use of some Natural Language Processing (NLP) techniques to aviation regulations. Choose your favorite and enjoy!')
     put_markdown('---')
     
-    for _ in range(100):
+    for _ in range(1000):
         choose_demonstration()
     
 # ====================================================================================================================================
@@ -384,21 +385,24 @@ def classify_ANAC(df, tokenizer, model):
         EXAMPLE_NUMBER = np.random.randint(0,df.shape[0])
         req = df.requirement[EXAMPLE_NUMBER].replace('\n',' ')
         title = df.title[EXAMPLE_NUMBER]
+        tag = df.tag[EXAMPLE_NUMBER]
     else:
         req = df.requirement.loc[df.title == selection].values[0]
+        tag = df.tag.loc[df.title == selection].values[0]
         req = str(req).replace('\n', ' ')
         title = selection
 
     put_markdown('### Selected requirement:')    
     
-    put_table([['ANAC RBAC ' + title]], header = ['Requirement:'])
+    put_table([['ANAC RBAC ' + title, tag]], header = ['Requirement:', 'Correct classification:'])
     put_table([[req]], header = ['Original text:'])
     
     translation = Translator().translate(req, src = 'pt', dest = 'en').text
     put_table([[translation]], header = ['Translation:'])
     
-    tokens = tokenizer.texts_to_sequences([req])
-    padded_tokens = tf.keras.preprocessing.sequence.pad_sequences(tokens, maxlen = sequence_length)
+    tokens = tokenizer.texts_to_sequences([translation])
+    padded_tokens = tf.keras.preprocessing.sequence.pad_sequences(tokens, maxlen = sequence_length, 
+                                                                  truncating='pre', padding='pre')
     X = tf.constant(np.array(padded_tokens))
     prediction = model.predict(X)
     predicted_prob = prediction.max()
@@ -456,27 +460,34 @@ def about_classification():
 def short_description(type = 'classification'):
     
     if type == 'classification':
-        put_markdown('### Requirement classification')
-        put_markdown('This is what happens in this demonstration:')
-        put_markdown('* You will select a requirement')
-        put_markdown('* Your selection will be pre-processed according to a sequence of steps:')
-        put_markdown('1. _Tokenization_: identification of individual words')
-        put_markdown('2. _Padding_: truncated or filled with zeros to make a sequence of 200 tokens (words)')
-        put_markdown('3. _Embedding_: translation of each word to a semantic vector representation with 300 dimensions')
-        put_markdown('* The resulting sequence is fed to a _Recurrent Neural Network_ that outputs the probability of each class')
-        put_markdown('* The class with the highest probability is selected')
-        put_markdown('---')
-    if type == 'comparison':
-        put_markdown('### Requirement comparison:')
-        put_markdown('This is what happens in this demonstration:')
-        put_markdown('* You will select a requirement')
-        put_markdown('* Your selection will be pre-processed according to a sequence of steps:')
-        put_markdown('1. _Translation_: automatic translation to English (if required)')
-        put_markdown('2. _Tokenization_: identification of individual words')
-        put_markdown('3. _POS filter_: removal of irrelevant parts-of-speech')
-        put_markdown('4. _Sorting_: remaining words are sorted according to their _Inverse Document Frequency (IDF)_')
-        put_markdown('5. _Embedding_: translation of each word to a semantic vector representation with 300 dimensions')
-        put_markdown('* Each FAA requirement is processed similarly and results are compared to find the best match considering the proportion of words that have similar vector representations')
-        put_markdown('* The FAA requirement with the largest semantic overlap is selected')
-        put_markdown('---')
+        
+        put_markdown(r'''
+                     ### Requirement classification
+                      This is what happens in this demonstration:
+                      * You will select a requirement
+                      * Your selection will be pre-processed according to a sequence of steps:
+                          1. _Tokenization_: identification of individual words
+                          2. _Padding_: truncated or filled with zeros to make a sequence of 200 tokens (words)
+                          3. _Embedding_: translation of each word to a semantic vector representation with 300 dimensions
+                      * The resulting sequence is fed to a _Recurrent Neural Network_ that outputs the probability of each class
+                      * The class with the highest probability is selected
+                      ---
+                      ''', lstrip = True)
+        
+    if type == 'comparison':   
+        
+        put_markdown(r'''
+                     ### Requirement comparison
+                     This is what happens in this demonstration:
+                     * You will select a requirement
+                     * Your selection will be pre-processed according to a sequence of steps:
+                         1. _Translation_: automatic translation to English (if required)
+                         2. _Tokenization_: identification of individual words
+                         3. _POS filter_: removal of irrelevant parts-of-speech
+                         4. _Sorting_: remaining words are sorted according to their _Inverse Document Frequency (IDF)_
+                         5. _Embedding_: translation of each word to a semantic vector representation with 300 dimensions
+                     * Each FAA requirement is processed similarly and results are compared to find the best match considering the proportion of words that have similar vector representations
+                     * The FAA requirement with the largest semantic overlap is selected
+                     ---
+                    ''', lstrip = True)
     
