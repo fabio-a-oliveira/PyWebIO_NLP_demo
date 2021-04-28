@@ -17,9 +17,9 @@ from os import listdir, mkdir, chdir, getcwd
 from os.path import join
 import requests
 
-
 from pywebio.input import input_group, input, select, checkbox, radio, actions, textarea
 from pywebio.output import put_text, put_table, put_image, output, set_scope, remove, clear, get_scope, use_scope, put_markdown
+from pywebio.output import put_processbar, set_processbar, put_html
 
 # ====================================================================================================================================
 # Setup
@@ -154,6 +154,11 @@ def jaccard_mod(string1, string2, tokenizer, embedding_layer, max_words = None):
 
 def main():
 
+    # meta for page preview
+    URL = 'https://github.com/fabio-a-oliveira/PyWebIO_NLP_demo/raw/main/images/requirement_comparison_small.png'
+    put_html('<meta property="og:image" content="' + URL + '">')
+    
+    # header
     put_markdown('## NLP applied to aviation regulations')
     put_markdown('### Demonstrations using 14 CFR Part 121 and RBAC 121')
     put_text('This series of demos showcases the use of some Natural Language Processing (NLP) techniques to aviation regulations. Choose your favorite and enjoy!')
@@ -248,11 +253,14 @@ def find_FAA_from_ANAC(df_ANAC, df_FAA, tokenizer, embedding_layer):
     put_table([[translation]], header = ['Translation:'])
     
     set_scope('wait')
-    put_text('Looking for similar requirements in FAA FAR Part 121...', scope = 'wait')
+    put_text('Looking for similar requirements in FAA 14-CFR Part 121...', scope = 'wait')
     
     similarity = []
-    for ref in df_FAA.requirement:
+    put_processbar('bar',init=0, auto_close=True)
+    
+    for n, ref in enumerate(df_FAA.requirement):
         similarity.append(jaccard_mod(translation, ref, tokenizer, embedding_layer))
+        set_processbar('bar', value = (n+1) / df_FAA.shape[0])
         
     match_index = np.array(similarity).argmax()
     
@@ -298,11 +306,14 @@ def find_FAA_from_input(df_FAA, tokenizer, embedding_layer):
         put_table([[translation]], header = ["Translation (from '{}' to 'en')".format(src_language)])
     
     set_scope('wait')
-    put_text('Looking for similar requirements in FAA FAR Part 121...', scope = 'wait')
+    put_text('Looking for similar requirements in FAA 14-CFR Part 121...', scope = 'wait')
     
     similarity = []
-    for ref in df_FAA.requirement:
+    put_processbar('bar',init=0, auto_close=True)
+    
+    for n, ref in enumerate(df_FAA.requirement):
         similarity.append(jaccard_mod(translation, ref, tokenizer, embedding_layer))
+        set_processbar('bar', value = (n+1) / df_FAA.shape[0])
         
     match_index = np.array(similarity).argmax()
     
