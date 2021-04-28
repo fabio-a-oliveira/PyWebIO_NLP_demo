@@ -153,10 +153,7 @@ def jaccard_mod(string1, string2, tokenizer, embedding_layer, max_words = None):
 # ====================================================================================================================================
 
 def main():
-    
-    put_image(open(join('images', 'requirement_comparison_small.png'), 'rb').read(), width = '100%')
 
-    
     put_markdown('## NLP applied to aviation regulations')
     put_markdown('### Demonstrations using 14 CFR Part 121 and RBAC 121')
     put_text('This series of demos showcases the use of some Natural Language Processing (NLP) techniques to aviation regulations. Choose your favorite and enjoy!')
