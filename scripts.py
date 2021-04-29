@@ -273,13 +273,34 @@ def find_FAA_from_ANAC(df_ANAC, df_FAA, tokenizer, embedding_layer):
               header = ['Match:', 'Similarity Index:'])
     put_table([[df_FAA.requirement[match_index]]], header = ['Requirement:'])
     
-    plt.figure(figsize = (15,5));
+    # plot figures
+    
+    plt.figure(figsize = (15,8));
     plt.hist(np.array(similarity), 50);
-    plt.title('Histogram - similarity translation vs reference');
-    plt.savefig(join('images', 'temp.png'))
-    #plt.show();
+    plt.title('Histogram - similarity translation vs reference', fontsize=24);
+    plt.xlabel('Similarity', fontsize=20)
+    plt.ylabel('Quantity', fontsize=20)
+    plt.xlim(right=1.2)
+    plt.xticks(fontsize = 16)
+    plt.yticks(fontsize = 16)
+    plt.savefig(join('images', 'temp_hist.png'))
+    
+    indices = np.argsort(similarity)[-10:]
+    labels = df_FAA.title.iloc[indices]
         
-    put_image(open(join('images', 'temp.png'), 'rb').read(), width = '100%')
+    values = np.array(similarity)[indices]
+    plt.figure(figsize = (15,8));
+    plt.title('Bar plot - requirements with highest similarity', fontsize=24)
+    plt.xlabel('Similarity', fontsize=20)
+    plt.ylabel('Requirement title', fontsize=20)
+    plt.barh(labels, values, .5)
+    plt.xlim(right=1.2)
+    plt.xticks(fontsize = 16)
+    plt.yticks(fontsize = 16)
+    plt.savefig(join('images', 'temp_barh.png'))
+        
+    put_image(open(join('images', 'temp_hist.png'), 'rb').read(), width = '100%')
+    put_image(open(join('images', 'temp_barh.png'), 'rb').read(), width = '100%')
     
 # ====================================================================================================================================
 # find_FAA_from_input()    
@@ -324,15 +345,36 @@ def find_FAA_from_input(df_FAA, tokenizer, embedding_layer):
     
     put_table([['FAR' + df_FAA.title[match_index], np.round(np.max(similarity),3)]], 
               header = ['Match:', 'Similarity Index:'])
-    put_table([[df_FAA.requirement[match_index]]], header = ['Requirement:'])
+    put_table([[df_FAA.requirement[match_index]]], header = ['Requirement:']) 
     
-    plt.figure(figsize = (15,5));
+    # plot figures
+    
+    plt.figure(figsize = (15,8));
     plt.hist(np.array(similarity), 50);
-    plt.title('Histogram - similarity translation vs reference');
-    plt.savefig(join('images', 'temp.png'))
-    #plt.show();
+    plt.title('Histogram - similarity translation vs reference', fontsize=24);
+    plt.xlabel('Similarity', fontsize=20)
+    plt.ylabel('Quantity', fontsize=20)
+    plt.xlim(right=1.2)
+    plt.xticks(fontsize = 16)
+    plt.yticks(fontsize = 16)
+    plt.savefig(join('images', 'temp_hist.png'))
+    
+    indices = np.argsort(similarity)[-10:]
+    labels = df_FAA.title.iloc[indices]
         
-    put_image(open(join('images', 'temp.png'), 'rb').read(), width = '100%')    
+    values = np.array(similarity)[indices]
+    plt.figure(figsize = (15,8));
+    plt.title('Bar plot - requirements with highest similarity', fontsize=24)
+    plt.xlabel('Similarity', fontsize=20)
+    plt.ylabel('Requirement title', fontsize=20)
+    plt.barh(labels, values, .5)
+    plt.xlim(right=1.2)
+    plt.xticks(fontsize = 16)
+    plt.yticks(fontsize = 16)
+    plt.savefig(join('images', 'temp_barh.png'))
+        
+    put_image(open(join('images', 'temp_hist.png'), 'rb').read(), width = '100%')
+    put_image(open(join('images', 'temp_barh.png'), 'rb').read(), width = '100%')
     
 # ====================================================================================================================================
 # about_comparison()
